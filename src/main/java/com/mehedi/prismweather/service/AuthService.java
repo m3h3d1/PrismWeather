@@ -1,9 +1,11 @@
 package com.mehedi.prismweather.service;
 
 import com.mehedi.prismweather.dto.request.LoginRequest;
+import com.mehedi.prismweather.dto.request.PasswordResetRequest;
 import com.mehedi.prismweather.dto.request.RegisterRequest;
 import com.mehedi.prismweather.dto.response.ApiResponse;
 import com.mehedi.prismweather.dto.response.LoginResponse;
+import com.mehedi.prismweather.dto.response.PasswordResetResponse;
 import com.mehedi.prismweather.dto.response.RegisterResponse;
 import com.mehedi.prismweather.exception.CustomException;
 import com.mehedi.prismweather.model.User;
@@ -109,6 +111,39 @@ public class AuthService {
                 HttpStatus.CREATED.value(),
                 "User registered successfully",
                 registerResponse
+        );
+    }
+
+    /**
+     * Reset Password Logic
+     *
+     * @param passwordResetRequest Contains the email and new password
+     * @return A response containing confirmation and user information
+     */
+    public ApiResponse<PasswordResetResponse> resetPassword(PasswordResetRequest passwordResetRequest) {
+        User user = userRepository.findByEmail(passwordResetRequest.getEmail())
+                .orElseThrow(() -> new CustomException("Email not found", 404));
+
+        String hashedPassword = passwordEncoder.encode(passwordResetRequest.getPassword());
+
+        user.setPassword(hashedPassword);
+        userRepository.save(user);
+
+        PasswordResetResponse.UserData userData = PasswordResetResponse.UserData.builder()
+                .email(user.getEmail())
+                .name(user.getUsername())
+                .build();
+
+        PasswordResetResponse passwordResetResponse = PasswordResetResponse.builder()
+                .message("User password reset successfully")
+                .user(userData)
+                .build();
+
+        log.info("Password reset successfully for email: {}", passwordResetRequest.getEmail());
+        return new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Password reset successfully",
+                passwordResetResponse
         );
     }
 }

@@ -1,9 +1,11 @@
 package com.mehedi.prismweather.controller;
 
 import com.mehedi.prismweather.dto.request.LoginRequest;
+import com.mehedi.prismweather.dto.request.PasswordResetRequest;
 import com.mehedi.prismweather.dto.request.RegisterRequest;
 import com.mehedi.prismweather.dto.response.ApiResponse;
 import com.mehedi.prismweather.dto.response.LoginResponse;
+import com.mehedi.prismweather.dto.response.PasswordResetResponse;
 import com.mehedi.prismweather.dto.response.RegisterResponse;
 import com.mehedi.prismweather.service.AuthService;
 import jakarta.validation.Valid;
@@ -37,5 +39,14 @@ public class AuthController {
     public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest registerRequest) {
         ApiResponse<RegisterResponse> apiResponse = authService.register(registerRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
+    }
+
+    /**
+     * Reset Password Endpoint: Allows users to reset their password.
+     */
+    @PostMapping("/password/reset")
+    public ResponseEntity<ApiResponse<PasswordResetResponse>> resetPassword(@Valid @RequestBody PasswordResetRequest passwordResetRequest) {
+        ApiResponse<PasswordResetResponse> response = authService.resetPassword(passwordResetRequest);
+        return ResponseEntity.ok(response);
     }
 }
