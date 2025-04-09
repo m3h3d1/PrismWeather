@@ -1,0 +1,29 @@
+meta {
+  name: register
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/api/auth/register
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "test9@test.com",
+    "password": "password123",
+    "name": "Test Name",
+    "accountType": "Freelancer",
+    "country": "Nigeria",
+    "countryCode": "+123",
+    "state": "Rivers",
+    "address": "No. 6 Prince Okey",
+    "phoneNumber": "8124566736"
+  }
+}
