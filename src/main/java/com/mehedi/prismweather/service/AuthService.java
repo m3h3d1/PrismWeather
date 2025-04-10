@@ -8,7 +8,6 @@ import com.mehedi.prismweather.exception.CustomException;
 import com.mehedi.prismweather.model.User;
 import com.mehedi.prismweather.repository.UserRepository;
 import com.mehedi.prismweather.util.JwtUtil;
-import com.mysql.cj.log.Log;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
