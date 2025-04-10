@@ -3,11 +3,9 @@ package com.mehedi.prismweather.controller;
 import com.mehedi.prismweather.dto.request.LoginRequest;
 import com.mehedi.prismweather.dto.request.PasswordResetRequest;
 import com.mehedi.prismweather.dto.request.RegisterRequest;
-import com.mehedi.prismweather.dto.response.ApiResponse;
-import com.mehedi.prismweather.dto.response.LoginResponse;
-import com.mehedi.prismweather.dto.response.PasswordResetResponse;
-import com.mehedi.prismweather.dto.response.RegisterResponse;
+import com.mehedi.prismweather.dto.response.*;
 import com.mehedi.prismweather.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -47,6 +45,24 @@ public class AuthController {
     @PostMapping("/password/reset")
     public ResponseEntity<ApiResponse<PasswordResetResponse>> resetPassword(@Valid @RequestBody PasswordResetRequest passwordResetRequest) {
         ApiResponse<PasswordResetResponse> response = authService.resetPassword(passwordResetRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Logout Endpoint: Invalidate the user's JWT token.
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<LogoutResponse>> logout(HttpServletRequest request) {
+        // Extract the token from the Authorization header
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Authorization header missing or invalid");
+        }
+
+        String token = authorizationHeader.substring(7);
+        ApiResponse<LogoutResponse> response = authService.logout(token);
+
         return ResponseEntity.ok(response);
     }
 }

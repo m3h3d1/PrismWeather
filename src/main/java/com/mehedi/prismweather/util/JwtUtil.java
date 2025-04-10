@@ -1,6 +1,8 @@
 package com.mehedi.prismweather.util;
 
 import com.mehedi.prismweather.model.User;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -37,5 +39,27 @@ public class JwtUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    /**
+     * Validate the token and extract claims.
+     *
+     * @param token The JWT token to validate
+     * @return Claims if valid, null otherwise
+     */
+    public Claims validateTokenAndGetClaims(String token) {
+        try {
+            // Decode the Base64-encoded secret key
+            byte[] keyBytes = Base64.getDecoder().decode(secretKey);
+            Key key = Keys.hmacShaKeyFor(keyBytes);
+
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (JwtException e) {
+            return null; // Invalid token
+        }
     }
 }

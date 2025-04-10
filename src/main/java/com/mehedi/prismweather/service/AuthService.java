@@ -3,14 +3,13 @@ package com.mehedi.prismweather.service;
 import com.mehedi.prismweather.dto.request.LoginRequest;
 import com.mehedi.prismweather.dto.request.PasswordResetRequest;
 import com.mehedi.prismweather.dto.request.RegisterRequest;
-import com.mehedi.prismweather.dto.response.ApiResponse;
-import com.mehedi.prismweather.dto.response.LoginResponse;
-import com.mehedi.prismweather.dto.response.PasswordResetResponse;
-import com.mehedi.prismweather.dto.response.RegisterResponse;
+import com.mehedi.prismweather.dto.response.*;
 import com.mehedi.prismweather.exception.CustomException;
 import com.mehedi.prismweather.model.User;
 import com.mehedi.prismweather.repository.UserRepository;
 import com.mehedi.prismweather.util.JwtUtil;
+import com.mysql.cj.log.Log;
+import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,20 +29,19 @@ public class AuthService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private JwtBlacklistService jwtBlacklistService;
+
     public ApiResponse<LoginResponse> login(LoginRequest loginRequest) {
-        // Fetch user by email
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new CustomException("Invalid email or password", 400));
 
-        // Validate password
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new CustomException("Invalid email or password", 400);
         }
 
-        // Generate JWT Token
         String token = jwtUtil.generateToken(user);
 
-        // Build the response
         LoginResponse.UserData userData = LoginResponse.UserData.builder()
                 .email(user.getEmail())
                 .name(user.getUsername())
@@ -62,16 +60,13 @@ public class AuthService {
     }
 
     public ApiResponse<RegisterResponse> register(RegisterRequest registerRequest) {
-        // Check if the email is already in use
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             log.warn("Registration attempt failed: email {} is already taken", registerRequest.getEmail());
             throw new CustomException("Email is already taken", 409);
         }
 
-        // Hash the password
         String hashedPassword = passwordEncoder.encode(registerRequest.getPassword());
 
-        // Create a new User object
         User newUser = User.builder()
                 .email(registerRequest.getEmail())
                 .password(hashedPassword)
@@ -85,13 +80,10 @@ public class AuthService {
                 .role(User.Role.USER) // Default role is USER
                 .build();
 
-        // Save the user to the database
         User savedUser = userRepository.save(newUser);
 
-        // Generate a JWT Token for the newly registered user
         String token = jwtUtil.generateToken(savedUser);
 
-        // Build the response
         RegisterResponse registerResponse = RegisterResponse.builder()
                 .token(token)
                 .user(RegisterResponse.UserData.builder()
@@ -106,7 +98,6 @@ public class AuthService {
                         .build())
                 .build();
 
-        // Wrap response with ApiResponse class
         return new ApiResponse<>(
                 HttpStatus.CREATED.value(),
                 "User registered successfully",
@@ -144,6 +135,45 @@ public class AuthService {
                 HttpStatus.OK.value(),
                 "Password reset successfully",
                 passwordResetResponse
+        );
+    }
+
+    /**
+     * Log out a user by invalidating their JWT token.
+     *
+     * @param token The user's current JWT token
+     * @return A logout response containing the user information
+     */
+    public ApiResponse<LogoutResponse> logout(String token) {
+        Claims claims = jwtUtil.validateTokenAndGetClaims(token);
+
+        if (claims == null) {
+            throw new CustomException("Invalid or expired token", 400);
+        }
+
+        String userEmail = claims.getSubject();
+        String userName = claims.get("name", String.class);
+
+        // Check if the user exists in the database
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new CustomException("User not found", 404));
+
+        long expirationTimeInMillis = claims.getExpiration().getTime() - System.currentTimeMillis();
+        long expirationInSeconds = expirationTimeInMillis / 1000;
+
+        // Blacklist the token in Redis
+        jwtBlacklistService.blacklistToken(token, expirationInSeconds);
+
+        LogoutResponse logoutResponse = LogoutResponse.builder()
+                .email(userEmail)
+                .build();
+
+        log.info("User {} logged out successfully", userName);
+
+        return new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "User logged out successfully",
+                logoutResponse
         );
     }
 }
