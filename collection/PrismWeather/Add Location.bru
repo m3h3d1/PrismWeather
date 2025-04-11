@@ -1,0 +1,20 @@
+meta {
+  name: Add Location
+  type: http
+  seq: 8
+}
+
+post {
+  url: http://localhost:8080/api/locations
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer <JWT_TOKEN>
+  Content-Type: application/json
+}
+
+body:json {
+  {"location":"Port Harcourt, Rivers, Nigeria, 200272","title":"My City"}
+}
