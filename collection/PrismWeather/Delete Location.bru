@@ -1,0 +1,15 @@
+meta {
+  name: Delete Location
+  type: http
+  seq: 10
+}
+
+delete {
+  url: http://localhost:8080/api/locations/2
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0OUB0ZXN0LmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzQ0Mzc2MTUzLCJleHAiOjE3NDQ0NjI1NTN9.5vH_UWcx0aYOn78uU4J_hCK3X84TGxvbfbMUcSoey3s
+}

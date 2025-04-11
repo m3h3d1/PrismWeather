@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LocationResponse {
+    private Long id;
     private String location;
     private String title;
     private LocalDate createdAt;

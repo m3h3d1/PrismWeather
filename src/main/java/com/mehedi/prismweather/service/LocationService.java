@@ -40,6 +40,7 @@ public class LocationService {
         Location savedLocation = locationRepository.save(location);
 
         return LocationResponse.builder()
+                .id(savedLocation.getId())
                 .location(savedLocation.getLocation())
                 .title(savedLocation.getTitle())
                 .createdAt(savedLocation.getCreatedAt())
@@ -47,16 +48,26 @@ public class LocationService {
     }
 
     public Page<LocationResponse> getAllLocationsByUser(String userEmail, Pageable pageable) {
-        // Find the user by email
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND.value()));
 
         Page<Location> locations = locationRepository.findByUser(user, pageable);
 
         return locations.map(location -> LocationResponse.builder()
+                .id(location.getId())
                 .location(location.getLocation())
                 .title(location.getTitle())
                 .createdAt(location.getCreatedAt())
                 .build());
+    }
+
+    public void deleteLocationById(Long id, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND.value()));
+
+        Location location = locationRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new CustomException("Location not found or you don't have permission to delete it", HttpStatus.BAD_REQUEST.value()));
+
+        locationRepository.delete(location);
     }
 }

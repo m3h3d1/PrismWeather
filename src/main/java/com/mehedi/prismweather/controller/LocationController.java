@@ -46,4 +46,16 @@ public class LocationController {
 
         return ResponseEntity.ok(new ApiResponse<>(200, "Locations retrieved successfully", locations.getContent()));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteLocation(
+            @PathVariable Long id,
+            Principal principal) {
+
+        String userEmail = principal.getName();
+        locationService.deleteLocationById(id, userEmail);
+        return ResponseEntity.ok(
+                new ApiResponse<>(200, "Location deleted successfully", null)
+        );
+    }
 }
