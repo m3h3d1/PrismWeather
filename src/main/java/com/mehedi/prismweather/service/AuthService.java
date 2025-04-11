@@ -5,6 +5,7 @@ import com.mehedi.prismweather.dto.request.PasswordResetRequest;
 import com.mehedi.prismweather.dto.request.RegisterRequest;
 import com.mehedi.prismweather.dto.response.*;
 import com.mehedi.prismweather.exception.CustomException;
+import com.mehedi.prismweather.model.Profile;
 import com.mehedi.prismweather.model.User;
 import com.mehedi.prismweather.repository.UserRepository;
 import com.mehedi.prismweather.util.JwtUtil;
@@ -66,16 +67,20 @@ public class AuthService {
 
         String hashedPassword = passwordEncoder.encode(registerRequest.getPassword());
 
-        User newUser = User.builder()
-                .email(registerRequest.getEmail())
-                .password(hashedPassword)
-                .username(registerRequest.getName())
-                .accountType(registerRequest.getAccountType())
+        Profile profile = Profile.builder()
                 .country(registerRequest.getCountry())
                 .countryCode(registerRequest.getCountryCode())
                 .state(registerRequest.getState())
                 .address(registerRequest.getAddress())
                 .phoneNumber(registerRequest.getPhoneNumber())
+                .build();
+
+        User newUser = User.builder()
+                .email(registerRequest.getEmail())
+                .password(hashedPassword)
+                .username(registerRequest.getName())
+                .accountType(registerRequest.getAccountType())
+                .profile(profile)
                 .role(User.Role.USER) // Default role is USER
                 .build();
 
@@ -86,14 +91,14 @@ public class AuthService {
         RegisterResponse registerResponse = RegisterResponse.builder()
                 .token(token)
                 .user(RegisterResponse.UserData.builder()
-                        .email(savedUser.getEmail())
-                        .name(savedUser.getUsername())
-                        .accountType(savedUser.getAccountType())
-                        .country(savedUser.getCountry())
-                        .countryCode(savedUser.getCountryCode())
-                        .state(savedUser.getState())
-                        .address(savedUser.getAddress())
-                        .phoneNumber(savedUser.getPhoneNumber())
+                        .email(newUser.getEmail())
+                        .name(newUser.getUsername())
+                        .accountType(newUser.getAccountType())
+                        .country(profile.getCountry())
+                        .countryCode(profile.getCountryCode())
+                        .state(profile.getState())
+                        .address(profile.getAddress())
+                        .phoneNumber(profile.getPhoneNumber())
                         .build())
                 .build();
 

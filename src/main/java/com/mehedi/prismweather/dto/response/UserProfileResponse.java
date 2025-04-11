@@ -11,14 +11,22 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserProfileResponse {
     private String id;
-    private String name;
     private String email;
-    private UserAddress address;
+    private String username;
+    private String accountType;
+    private UserProfile profile;
 
     @Data
     @Builder
-    public static class UserAddress {
+    public static class UserProfile {
+        private String firstName;
+        private String lastName;
         private String country;
+        private String countryCode;
         private String state;
+        private String address;
+        private String phoneNumber;
+        private String occupation;
+        private String dateOfBirth;
     }
 }

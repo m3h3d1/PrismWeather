@@ -30,24 +30,13 @@ public class User {
     @Column(name = "account_type", nullable = false)
     private String accountType; // Freelancer or Company
 
-    @Column(nullable = false, length = 50)
-    private String country;
-
-    @Column(name = "country_code", nullable = false, length = 10)
-    private String countryCode;
-
-    @Column(nullable = false, length = 50)
-    private String state;
-
-    @Column(nullable = false, length = 255)
-    private String address;
-
-    @Column(name = "phone_number", nullable = false, length = 15)
-    private String phoneNumber;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private Role role = Role.USER; // Default role is USER.
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "profile_id", referencedColumnName = "id")
+    private Profile profile;
 
     public enum Role {
         USER,

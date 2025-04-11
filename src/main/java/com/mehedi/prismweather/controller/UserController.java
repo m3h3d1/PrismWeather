@@ -1,13 +1,13 @@
 package com.mehedi.prismweather.controller;
 
+import com.mehedi.prismweather.dto.request.UpdateUserRequest;
 import com.mehedi.prismweather.dto.response.ApiResponse;
 import com.mehedi.prismweather.dto.response.UserProfileResponse;
 import com.mehedi.prismweather.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
@@ -36,6 +36,28 @@ public class UserController {
 
         return ResponseEntity.ok(
             new ApiResponse<>(200, "Retrieved a current logged in profile successfully", userProfile)
+        );
+    }
+
+    /**
+     * Edit logged-in user's profile.
+     *
+     * @param id           The ID of the user to update.
+     * @param requestDto   DTO containing updated user fields.
+     * @return ResponseEntity with success or error message.
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserProfileResponse>> editUserProfile(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateUserRequest requestDto,
+            Principal principal) {
+
+        // Ensure the user is authorized to update their own profile
+        String currentUserEmail = principal.getName();
+        UserProfileResponse updatedUser = userService.updateUserProfile(id, currentUserEmail, requestDto);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(200, "User edited successfully", updatedUser)
         );
     }
 }

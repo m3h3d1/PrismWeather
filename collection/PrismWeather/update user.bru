@@ -1,0 +1,20 @@
+meta {
+  name: update user
+  type: http
+  seq: 7
+}
+
+put {
+  url: http://localhost:8080/api/users/1
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer <JWT-TOKEN>
+  Content-Type: application/json
+}
+
+body:json {
+  {"firstName":"John","lastName":"Doe","email":"johndoe@example.com","phoneNumber":"+1234567890","country":"USA","occupation":"Software Engineer","address":"123 Main Street","dateOfBirth":"1990-01-01"}
+}
