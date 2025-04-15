@@ -1,0 +1,15 @@
+meta {
+  name: Daily forecast for a location
+  type: http
+  seq: 13
+}
+
+get {
+  url: http://localhost:8080/api/locations/1/forecast
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0OUB0ZXN0LmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzQ0NzEyMzUzLCJleHAiOjE3NDQ3OTg3NTN9.xsycoBMVnoFrCyj7IqQJmAPbdBsdhiJSsUwmmgstFYs
+}

@@ -7,6 +7,7 @@ import com.mehedi.prismweather.model.User;
 import com.mehedi.prismweather.repository.LocationRepository;
 import com.mehedi.prismweather.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -23,13 +24,14 @@ public class WeatherService {
     private final LocationRepository locationRepository;
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
-    private final String openWeatherApiKey = "c26dca9c0e9b975e63a5077ae552e24b";
+    private final String openWeatherApiKey;
 
     @Autowired
-    public WeatherService(LocationRepository locationRepository, UserRepository userRepository, RestTemplate restTemplate) {
+    public WeatherService(LocationRepository locationRepository, UserRepository userRepository, RestTemplate restTemplate, @Value("${openweather.api.key}") String openWeatherApiKey) {
         this.locationRepository = locationRepository;
         this.userRepository = userRepository;
         this.restTemplate = restTemplate;
+        this.openWeatherApiKey = openWeatherApiKey;
     }
 
     public WeatherResponse getCurrentWeatherForLocation(Long locationId, String userEmail) {
@@ -39,7 +41,6 @@ public class WeatherService {
         Location location = locationRepository.findByIdAndUser(locationId, user)
                 .orElseThrow(() -> new CustomException("Location not found or access denied", HttpStatus.FORBIDDEN.value()));
 
-        // Build the OpenWeather API URL
         String url = String.format(
                 "https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s",
                 location.getLocation(),
@@ -47,7 +48,6 @@ public class WeatherService {
         );
 
         try {
-            // Call the OpenWeather API
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null,
                     new ParameterizedTypeReference<>() {});
 

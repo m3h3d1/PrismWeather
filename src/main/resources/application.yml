@@ -22,3 +22,7 @@ logging:
     org.springframework.security: DEBUG
     com.mehedi.prismweather: DEBUG
     org.hibernate.SQL: DEBUG
+
+openweather:
+  api:
+    key: "c26dca9c0e9b975e63a5077ae552e24b"

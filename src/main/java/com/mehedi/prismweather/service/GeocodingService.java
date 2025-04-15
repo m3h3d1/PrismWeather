@@ -3,6 +3,7 @@ package com.mehedi.prismweather.service;
 import com.mehedi.prismweather.dto.response.GeocodingResponse;
 import com.mehedi.prismweather.exception.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -18,11 +19,12 @@ import java.util.Map;
 public class GeocodingService {
 
     private final RestTemplate restTemplate;
-    private final String openWeatherApiKey = "c26dca9c0e9b975e63a5077ae552e24b"; // Replace with your OpenWeather API key
+    private final String openWeatherApiKey;
 
     @Autowired
-    public GeocodingService(RestTemplate restTemplate) {
+    public GeocodingService(RestTemplate restTemplate, @Value("${openweather.api.key}") String openWeatherApiKey) {
         this.restTemplate = restTemplate;
+        this.openWeatherApiKey = openWeatherApiKey;
     }
 
     public GeocodingResponse resolveCoordinates(String locationName) {
