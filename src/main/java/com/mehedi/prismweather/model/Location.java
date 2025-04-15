@@ -2,10 +2,8 @@ package com.mehedi.prismweather.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -26,6 +24,12 @@ public class Location {
 
     @NotBlank(message = "Title cannot be blank")
     private String title;
+
+    @NotNull(message = "Latitude cannot be null")
+    private Double lat;
+
+    @NotNull(message = "Longitude cannot be null")
+    private Double lon;
 
     private LocalDate createdAt;
 

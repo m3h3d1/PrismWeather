@@ -1,6 +1,7 @@
 package com.mehedi.prismweather.service;
 
 import com.mehedi.prismweather.dto.request.LocationRequest;
+import com.mehedi.prismweather.dto.response.GeocodingResponse;
 import com.mehedi.prismweather.dto.response.LocationResponse;
 import com.mehedi.prismweather.exception.CustomException;
 import com.mehedi.prismweather.model.Location;
@@ -18,11 +19,13 @@ import java.time.LocalDate;
 @Service
 public class LocationService {
     private final LocationRepository locationRepository;
+    private final GeocodingService geocodingService;
     private final UserRepository userRepository;
 
     @Autowired
-    public LocationService(LocationRepository locationRepository, UserRepository userRepository) {
+    public LocationService(LocationRepository locationRepository, GeocodingService geocodingService, UserRepository userRepository) {
         this.locationRepository = locationRepository;
+        this.geocodingService = geocodingService;
         this.userRepository = userRepository;
     }
 
@@ -30,9 +33,17 @@ public class LocationService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Use the Geocoding service to resolve the latitude and longitude for the location name
+        GeocodingResponse geocodingResponse = geocodingService.resolveCoordinates(locationRequest.getLocation());
+        if (geocodingResponse == null || geocodingResponse.getLat() == null || geocodingResponse.getLon() == null) {
+            throw new CustomException("Unable to resolve location coordinates", HttpStatus.BAD_REQUEST.value());
+        }
+
         Location location = Location.builder()
                 .location(locationRequest.getLocation())
                 .title(locationRequest.getTitle())
+                .lat(geocodingResponse.getLat())
+                .lon(geocodingResponse.getLon())
                 .createdAt(LocalDate.now())
                 .user(user)
                 .build();
@@ -43,6 +54,8 @@ public class LocationService {
                 .id(savedLocation.getId())
                 .location(savedLocation.getLocation())
                 .title(savedLocation.getTitle())
+                .lat(savedLocation.getLat())
+                .lon(savedLocation.getLon())
                 .createdAt(savedLocation.getCreatedAt())
                 .build();
     }
@@ -57,6 +70,8 @@ public class LocationService {
                 .id(location.getId())
                 .location(location.getLocation())
                 .title(location.getTitle())
+                .lat(location.getLat())
+                .lon(location.getLon())
                 .createdAt(location.getCreatedAt())
                 .build());
     }
