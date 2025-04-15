@@ -1,0 +1,15 @@
+meta {
+  name: Get Weather
+  type: http
+  seq: 11
+}
+
+get {
+  url: http://localhost:8080/api/locations/1/weather
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0OUB0ZXN0LmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzQ0NzAxMzYzLCJleHAiOjE3NDQ3ODc3NjN9.P7xeVgcE1dX2yR0cgtny2nj39pBUGyg-0mKf55m-THA
+}
