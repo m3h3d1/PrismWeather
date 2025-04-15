@@ -26,3 +26,7 @@ logging:
 openweather:
   api:
     key: "c26dca9c0e9b975e63a5077ae552e24b"
+
+weatherapi:
+  key: "04ca50ccd4e14d25831114854251504"
+

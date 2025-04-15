@@ -1,0 +1,15 @@
+meta {
+  name: Weather Alert
+  type: http
+  seq: 13
+}
+
+get {
+  url: http://localhost:8080/api/locations/1/alerts
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0OUB0ZXN0LmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzQ0NzE5MjAyLCJleHAiOjE3NDQ4MDU2MDJ9.nJ5DN9uNuMtSP1BRD0Og3NNpxMJlYQgnNd3z6azybEk
+}
