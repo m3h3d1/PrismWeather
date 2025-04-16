@@ -27,6 +27,12 @@ openweather:
   api:
     key: "c26dca9c0e9b975e63a5077ae552e24b"
 
+#https://www.weatherapi.com/api-explorer.aspx
 weatherapi:
   key: "04ca50ccd4e14d25831114854251504"
 
+springdoc:
+  api-docs:
+    path: "/api-docs"
+  swagger-ui:
+    path: "/docs"
