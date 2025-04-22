@@ -69,33 +69,6 @@ PrismWeather is a Spring Boot-based web application that provides weather foreca
 
 ---
 
-## Project Structure
-
-```
-PrismWeather/
-├── src/
-│ ├── main/
-│ │ ├── java/com/mehedi/prismweather/
-│ │ │ ├── config/ # Configuration files (e.g., Swagger, Security, Redis)
-│ │ │ ├── controller/ # REST controllers for handling API requests
-│ │ │ ├── dto/ # Data Transfer Objects for requests and responses
-│ │ │ ├── exception/ # Custom exception handling
-│ │ │ ├── model/ # JPA entity models
-│ │ │ ├── repository/ # Spring Data JPA repositories
-│ │ │ ├── service/ # Business logic and service layer
-│ │ │ ├── util/ # Utility classes (e.g., JWT utilities)
-│ │ │ └── PrismWeatherApplication.java # Main application entry point
-│ │ └── resources/
-│ │ ├── application.yml # Application configuration
-│ │ └── static/ # Static resources (if any)
-├── build.gradle # Gradle build configuration
-├── settings.gradle # Gradle settings
-├── README.md # Project documentation
-└── HELP.md # Additional help
-```
-
----
-
 ## Setup and Installation
 
 ### Prerequisites
