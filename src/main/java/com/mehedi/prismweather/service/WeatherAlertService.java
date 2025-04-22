@@ -32,7 +32,8 @@ public class WeatherAlertService {
     private final String weatherApiKey;
 
     @Autowired
-    public WeatherAlertService(RestTemplate restTemplate, LocationRepository locationRepository, UserRepository userRepository, @Value("${weatherapi.key}") String weatherApiKey) {
+    public WeatherAlertService(RestTemplate restTemplate, LocationRepository locationRepository,
+            UserRepository userRepository, @Value("${weatherapi.key}") String weatherApiKey) {
         this.restTemplate = restTemplate;
         this.locationRepository = locationRepository;
         this.userRepository = userRepository;
@@ -40,31 +41,41 @@ public class WeatherAlertService {
     }
 
     public WeatherAlertResponse getWeatherAlerts(Long locationId, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND.value()));
+        User user = getUserByEmail(userEmail);
+        Location location = getLocationByIdAndUser(locationId, user);
 
-        Location location = locationRepository.findByIdAndUser(locationId, user)
-                .orElseThrow(() -> new CustomException("Location not found or access denied", HttpStatus.FORBIDDEN.value()));
-
-        String apiUrl = String.format(
-                "http://api.weatherapi.com/v1/forecast.json?key=%s&q=%s,%s&alerts=yes",
-                weatherApiKey, location.getLat(), location.getLon()
-        );
+        String apiUrl = buildWeatherApiUrl(location);
 
         try {
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                     apiUrl,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<>() {}
-            );
+                    new ParameterizedTypeReference<>() {
+                    });
 
-            Map<String, Object> responseData = response.getBody();
-            return parseWeatherAlertResponse(responseData);
-
+            return parseWeatherAlertResponse(response.getBody());
         } catch (HttpClientErrorException ex) {
-            throw new CustomException("Failed to fetch weather alerts: " + ex.getMessage(), HttpStatus.BAD_REQUEST.value());
+            throw new CustomException("Failed to fetch weather alerts: " + ex.getMessage(),
+                    HttpStatus.BAD_REQUEST.value());
         }
+    }
+
+    private User getUserByEmail(String userEmail) {
+        return userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND.value()));
+    }
+
+    private Location getLocationByIdAndUser(Long locationId, User user) {
+        return locationRepository.findByIdAndUser(locationId, user)
+                .orElseThrow(
+                        () -> new CustomException("Location not found or access denied", HttpStatus.FORBIDDEN.value()));
+    }
+
+    private String buildWeatherApiUrl(Location location) {
+        return String.format(
+                "http://api.weatherapi.com/v1/forecast.json?key=%s&q=%s,%s&alerts=yes",
+                weatherApiKey, location.getLat(), location.getLon());
     }
 
     private WeatherAlertResponse parseWeatherAlertResponse(Map<String, Object> responseData) {
@@ -73,29 +84,7 @@ public class WeatherAlertService {
         Double lon = (Double) locationData.get("lon");
         String timezone = (String) locationData.get("tz_id");
 
-        List<Map<String, Object>> alertsRaw = (List<Map<String, Object>>) ((Map<String, Object>) responseData.get("alerts"))
-                .get("alert");
-
-        List<AlertDetail> alerts = new ArrayList<>();
-        if (alertsRaw != null) {
-            for (Map<String, Object> alert : alertsRaw) {
-                String effectiveStr = (String) alert.get("effective");
-                String expiresStr = (String) alert.get("expires");
-
-                Long effective = parseIsoDateToEpoch(effectiveStr);
-                Long expires = parseIsoDateToEpoch(expiresStr);
-
-                alerts.add(
-                        AlertDetail.builder()
-                                .senderName((String) alert.get("headline"))
-                                .event((String) alert.get("event"))
-                                .start(effective)
-                                .end(expires)
-                                .description((String) alert.get("desc"))
-                                .build()
-                );
-            }
-        }
+        List<AlertDetail> alerts = parseAlerts((Map<String, Object>) responseData.get("alerts"));
 
         return WeatherAlertResponse.builder()
                 .lat(lat)
@@ -105,12 +94,32 @@ public class WeatherAlertService {
                 .build();
     }
 
-    /**
-     * Converts an ISO 8601 formatted date string into an epoch timestamp.
-     *
-     * @param isoDate The ISO 8601 formatted date string.
-     * @return The epoch timestamp (in seconds) or null if the input is null.
-     */
+    private List<AlertDetail> parseAlerts(Map<String, Object> alertsData) {
+        List<Map<String, Object>> alertsRaw = (List<Map<String, Object>>) alertsData.get("alert");
+        List<AlertDetail> alerts = new ArrayList<>();
+
+        if (alertsRaw != null) {
+            for (Map<String, Object> alert : alertsRaw) {
+                alerts.add(parseAlertDetail(alert));
+            }
+        }
+
+        return alerts;
+    }
+
+    private AlertDetail parseAlertDetail(Map<String, Object> alert) {
+        String effectiveStr = (String) alert.get("effective");
+        String expiresStr = (String) alert.get("expires");
+
+        return AlertDetail.builder()
+                .senderName((String) alert.get("headline"))
+                .event((String) alert.get("event"))
+                .start(parseIsoDateToEpoch(effectiveStr))
+                .end(parseIsoDateToEpoch(expiresStr))
+                .description((String) alert.get("desc"))
+                .build();
+    }
+
     private Long parseIsoDateToEpoch(String isoDate) {
         if (isoDate == null || isoDate.isEmpty()) {
             return null;

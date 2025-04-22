@@ -27,7 +27,8 @@ public class WeatherService {
     private final String openWeatherApiKey;
 
     @Autowired
-    public WeatherService(LocationRepository locationRepository, UserRepository userRepository, RestTemplate restTemplate, @Value("${openweather.api.key}") String openWeatherApiKey) {
+    public WeatherService(LocationRepository locationRepository, UserRepository userRepository,
+            RestTemplate restTemplate, @Value("${openweather.api.key}") String openWeatherApiKey) {
         this.locationRepository = locationRepository;
         this.userRepository = userRepository;
         this.restTemplate = restTemplate;
@@ -35,27 +36,35 @@ public class WeatherService {
     }
 
     public WeatherResponse getCurrentWeatherForLocation(Long locationId, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND.value()));
-
-        Location location = locationRepository.findByIdAndUser(locationId, user)
-                .orElseThrow(() -> new CustomException("Location not found or access denied", HttpStatus.FORBIDDEN.value()));
-
-        String url = String.format(
-                "https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s",
-                location.getLocation(),
-                openWeatherApiKey
-        );
+        User user = getUserByEmail(userEmail);
+        Location location = getLocationByIdAndUser(locationId, user);
+        String url = buildWeatherApiUrl(location.getLocation());
 
         try {
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null,
-                    new ParameterizedTypeReference<>() {});
-
-            Map<String, Object> weatherData = response.getBody();
-            return parseWeatherResponse(weatherData);
+                    new ParameterizedTypeReference<>() {
+                    });
+            return parseWeatherResponse(response.getBody());
         } catch (HttpClientErrorException ex) {
-            throw new CustomException("Failed to fetch weather information: " + ex.getMessage(), HttpStatus.BAD_REQUEST.value());
+            throw new CustomException("Failed to fetch weather information: " + ex.getMessage(),
+                    HttpStatus.BAD_REQUEST.value());
         }
+    }
+
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND.value()));
+    }
+
+    private Location getLocationByIdAndUser(Long locationId, User user) {
+        return locationRepository.findByIdAndUser(locationId, user)
+                .orElseThrow(
+                        () -> new CustomException("Location not found or access denied", HttpStatus.FORBIDDEN.value()));
+    }
+
+    private String buildWeatherApiUrl(String location) {
+        return String.format("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s", location,
+                openWeatherApiKey);
     }
 
     private WeatherResponse parseWeatherResponse(Map<String, Object> weatherData) {

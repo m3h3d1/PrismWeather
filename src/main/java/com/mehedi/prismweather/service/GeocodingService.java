@@ -28,33 +28,41 @@ public class GeocodingService {
     }
 
     public GeocodingResponse resolveCoordinates(String locationName) {
-        String url = String.format(
-                "https://api.openweathermap.org/geo/1.0/direct?q=%s&limit=1&appid=%s",
-                locationName, openWeatherApiKey
-        );
+        String url = buildGeocodingUrl(locationName);
 
         try {
-            ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<>() {}
-            );
+            List<Map<String, Object>> results = fetchGeocodingResults(url);
 
-            List<Map<String, Object>> results = response.getBody();
             if (results == null || results.isEmpty()) {
                 throw new CustomException("Location not found", HttpStatus.BAD_REQUEST.value());
             }
 
-            // Extract the first result (most relevant match)
-            Map<String, Object> firstResult = results.get(0);
-            Double lat = (Double) firstResult.get("lat");
-            Double lon = (Double) firstResult.get("lon");
-
-            return new GeocodingResponse(lat, lon);
+            return extractCoordinates(results.get(0));
 
         } catch (HttpClientErrorException ex) {
             throw new CustomException("Failed to resolve location: " + ex.getMessage(), HttpStatus.BAD_REQUEST.value());
         }
+    }
+
+    private String buildGeocodingUrl(String locationName) {
+        return String.format(
+                "https://api.openweathermap.org/geo/1.0/direct?q=%s&limit=1&appid=%s",
+                locationName, openWeatherApiKey);
+    }
+
+    private List<Map<String, Object>> fetchGeocodingResults(String url) {
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {
+                });
+        return response.getBody();
+    }
+
+    private GeocodingResponse extractCoordinates(Map<String, Object> result) {
+        Double lat = (Double) result.get("lat");
+        Double lon = (Double) result.get("lon");
+        return new GeocodingResponse(lat, lon);
     }
 }

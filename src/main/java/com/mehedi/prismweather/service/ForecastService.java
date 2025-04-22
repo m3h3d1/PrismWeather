@@ -35,7 +35,8 @@ public class ForecastService {
     private final String openWeatherApiKey;
 
     @Autowired
-    public ForecastService(LocationRepository locationRepository, UserRepository userRepository, RestTemplate restTemplate, @Value("${openweather.api.key}") String openWeatherApiKey) {
+    public ForecastService(LocationRepository locationRepository, UserRepository userRepository,
+            RestTemplate restTemplate, @Value("${openweather.api.key}") String openWeatherApiKey) {
         this.locationRepository = locationRepository;
         this.userRepository = userRepository;
         this.restTemplate = restTemplate;
@@ -47,14 +48,14 @@ public class ForecastService {
                 .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND.value()));
 
         Location location = locationRepository.findByIdAndUser(locationId, user)
-                .orElseThrow(() -> new CustomException("Location not found or access denied", HttpStatus.FORBIDDEN.value()));
+                .orElseThrow(
+                        () -> new CustomException("Location not found or access denied", HttpStatus.FORBIDDEN.value()));
 
         String cityName = location.getLocation();
 
         String url = String.format(
                 "https://api.openweathermap.org/data/2.5/forecast?q=%s&units=metric&appid=%s",
-                cityName, openWeatherApiKey
-        );
+                cityName, openWeatherApiKey);
 
         try {
             // Call the OpenWeather API to fetch 3-hourly forecast
@@ -62,8 +63,8 @@ public class ForecastService {
                     url,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<>() {}
-            );
+                    new ParameterizedTypeReference<>() {
+                    });
 
             Map<String, Object> forecastData = response.getBody();
 
@@ -75,10 +76,12 @@ public class ForecastService {
             } else if (ex.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 throw new CustomException("Invalid API key for OpenWeather", HttpStatus.BAD_REQUEST.value());
             } else {
-                throw new CustomException("Failed to fetch forecast data: " + ex.getMessage(), HttpStatus.BAD_REQUEST.value());
+                throw new CustomException("Failed to fetch forecast data: " + ex.getMessage(),
+                        HttpStatus.BAD_REQUEST.value());
             }
         } catch (Exception ex) {
-            throw new CustomException("An unexpected error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
+            throw new CustomException("An unexpected error occurred: " + ex.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
@@ -89,8 +92,8 @@ public class ForecastService {
         CityInfo cityInfo = CityInfo.builder()
                 .name((String) cityData.get("name"))
                 .country((String) cityData.get("country"))
-                .latitude((Double) coord.get("lat"))
-                .longitude((Double) coord.get("lon"))
+                .latitude(((Number) coord.get("lat")).doubleValue()) // Safely convert to Double
+                .longitude(((Number) coord.get("lon")).doubleValue()) // Safely convert to Double
                 .population((Integer) cityData.get("population"))
                 .timezone((Integer) cityData.get("timezone"))
                 .sunrise(Long.valueOf((Integer) cityData.get("sunrise")))
@@ -123,14 +126,16 @@ public class ForecastService {
     /**
      * Summarizes a single day's forecast data.
      *
-     * @param date          The date for the forecast.
-     * @param dailyEntries  A list of 3-hourly forecast entries for the day.
+     * @param date         The date for the forecast.
+     * @param dailyEntries A list of 3-hourly forecast entries for the day.
      * @return The summarized daily forecast.
      */
     private DailyForecastEntry summarizeDailyForecast(String date, List<Map<String, Object>> dailyEntries) {
         DoubleSummaryStatistics tempStats = dailyEntries.stream()
                 .map(entry -> (Map<String, Object>) entry.get("main"))
-                .collect(Collectors.summarizingDouble(main -> (Double) main.get("temp")));
+                .collect(Collectors.summarizingDouble(main -> ((Number) main.get("temp")).doubleValue())); // Safely
+                                                                                                           // convert to
+                                                                                                           // Double
 
         Double averageHumidity = dailyEntries.stream()
                 .map(entry -> (Map<String, Object>) entry.get("main"))
@@ -139,7 +144,8 @@ public class ForecastService {
                 .orElse(0);
 
         // Choose the first weather description/icon for simplicity
-        Map<String, Object> representativeWeather = ((List<Map<String, Object>>) dailyEntries.get(0).get("weather")).get(0);
+        Map<String, Object> representativeWeather = ((List<Map<String, Object>>) dailyEntries.get(0).get("weather"))
+                .get(0);
 
         return DailyForecastEntry.builder()
                 .date(date)
