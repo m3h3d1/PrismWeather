@@ -1,6 +1,5 @@
 package com.mehedi.prismweather.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -10,8 +9,11 @@ import java.util.concurrent.TimeUnit;
 public class JwtBlacklistService {
     private static final String BLACKLIST_KEY_PREFIX = "blacklist:";
 
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    public JwtBlacklistService(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     /**
      * Blacklist a JWT token by storing it in Redis with an expiration time.

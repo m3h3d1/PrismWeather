@@ -3,13 +3,15 @@ package com.mehedi.prismweather.service;
 import com.mehedi.prismweather.dto.ApiResponse;
 import com.mehedi.prismweather.dto.auth.*;
 import com.mehedi.prismweather.exception.CustomException;
+import com.mehedi.prismweather.factory.ResponseFactory;
 import com.mehedi.prismweather.model.Profile;
 import com.mehedi.prismweather.model.User;
 import com.mehedi.prismweather.repository.UserRepository;
+import com.mehedi.prismweather.service.auth.PasswordAuthenticationStrategy;
+import com.mehedi.prismweather.service.auth.TokenAuthenticationStrategy;
 import com.mehedi.prismweather.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,32 +19,38 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
 
-    private static final String INVALID_EMAIL_OR_PASSWORD = "Invalid email or password";
     private static final String EMAIL_ALREADY_TAKEN = "Email is already taken";
     private static final String EMAIL_NOT_FOUND = "Email not found";
-    private static final String INVALID_OR_EXPIRED_TOKEN = "Invalid or expired token";
     private static final String USER_NOT_FOUND = "User not found";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final JwtBlacklistService jwtBlacklistService;
+    private final ResponseFactory responseFactory;
+    private final PasswordAuthenticationStrategy passwordAuthStrategy;
+    private final TokenAuthenticationStrategy tokenAuthStrategy;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
-            JwtBlacklistService jwtBlacklistService) {
+    public AuthService(
+            UserRepository userRepository, 
+            PasswordEncoder passwordEncoder, 
+            JwtUtil jwtUtil,
+            JwtBlacklistService jwtBlacklistService,
+            ResponseFactory responseFactory,
+            PasswordAuthenticationStrategy passwordAuthStrategy,
+            TokenAuthenticationStrategy tokenAuthStrategy) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.jwtBlacklistService = jwtBlacklistService;
+        this.responseFactory = responseFactory;
+        this.passwordAuthStrategy = passwordAuthStrategy;
+        this.tokenAuthStrategy = tokenAuthStrategy;
     }
 
     public ApiResponse<LoginResponse> login(LoginRequest loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new CustomException(INVALID_EMAIL_OR_PASSWORD, 400));
-
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new CustomException(INVALID_EMAIL_OR_PASSWORD, 400);
-        }
+        // Use the password authentication strategy
+        User user = passwordAuthStrategy.authenticate(loginRequest);
 
         String token = jwtUtil.generateToken(user);
 
@@ -56,10 +64,7 @@ public class AuthService {
                 .user(userData)
                 .build();
 
-        return new ApiResponse<>(
-                HttpStatus.OK.value(),
-                "Login successful",
-                loginResponse);
+        return responseFactory.success("Login successful", loginResponse);
     }
 
     public ApiResponse<RegisterResponse> register(RegisterRequest registerRequest) {
@@ -105,10 +110,7 @@ public class AuthService {
                         .build())
                 .build();
 
-        return new ApiResponse<>(
-                HttpStatus.CREATED.value(),
-                "User registered successfully",
-                registerResponse);
+        return responseFactory.created("User registered successfully", registerResponse);
     }
 
     public ApiResponse<PasswordResetResponse> resetPassword(PasswordResetRequest passwordResetRequest) {
@@ -131,39 +133,27 @@ public class AuthService {
                 .build();
 
         log.info("Password reset successfully for email: {}", passwordResetRequest.getEmail());
-        return new ApiResponse<>(
-                HttpStatus.OK.value(),
-                "Password reset successfully",
-                passwordResetResponse);
+        return responseFactory.success("Password reset successfully", passwordResetResponse);
     }
 
     public ApiResponse<LogoutResponse> logout(String token) {
+        // Use the token authentication strategy to validate the token
+        User user = tokenAuthStrategy.authenticate(token);
+
+        // Get claims for expiration time
         Claims claims = jwtUtil.validateTokenAndGetClaims(token);
-
-        if (claims == null) {
-            throw new CustomException(INVALID_OR_EXPIRED_TOKEN, 400);
-        }
-
-        String userEmail = claims.getSubject();
-        String userName = claims.get("name", String.class);
-
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND, 404));
-
         long expirationTimeInMillis = claims.getExpiration().getTime() - System.currentTimeMillis();
         long expirationInSeconds = expirationTimeInMillis / 1000;
 
+        // Blacklist the token
         jwtBlacklistService.blacklistToken(token, expirationInSeconds);
 
         LogoutResponse logoutResponse = LogoutResponse.builder()
-                .email(userEmail)
+                .email(user.getEmail())
                 .build();
 
-        log.info("User {} logged out successfully", userName);
+        log.info("User {} logged out successfully", user.getUsername());
 
-        return new ApiResponse<>(
-                HttpStatus.OK.value(),
-                "User logged out successfully",
-                logoutResponse);
+        return responseFactory.success("User logged out successfully", logoutResponse);
     }
 }

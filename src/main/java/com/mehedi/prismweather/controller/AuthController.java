@@ -5,7 +5,6 @@ import com.mehedi.prismweather.dto.auth.*;
 import com.mehedi.prismweather.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,8 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     /**
      * Login Endpoint: Authenticate user and return a JWT token with user details.
@@ -51,16 +53,25 @@ public class AuthController {
      */
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<LogoutResponse>> logout(HttpServletRequest request) {
-        // Extract the token from the Authorization header
+        String token = extractTokenFromRequest(request);
+        ApiResponse<LogoutResponse> response = authService.logout(token);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Extracts JWT token from the Authorization header.
+     * 
+     * @param request The HTTP request
+     * @return The JWT token
+     * @throws IllegalArgumentException if the Authorization header is missing or invalid
+     */
+    private String extractTokenFromRequest(HttpServletRequest request) {
         String authorizationHeader = request.getHeader("Authorization");
 
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             throw new IllegalArgumentException("Authorization header missing or invalid");
         }
 
-        String token = authorizationHeader.substring(7);
-        ApiResponse<LogoutResponse> response = authService.logout(token);
-
-        return ResponseEntity.ok(response);
+        return authorizationHeader.substring(7);
     }
 }
