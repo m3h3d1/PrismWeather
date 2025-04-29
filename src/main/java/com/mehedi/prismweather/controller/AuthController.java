@@ -1,9 +1,7 @@
 package com.mehedi.prismweather.controller;
 
-import com.mehedi.prismweather.dto.request.LoginRequest;
-import com.mehedi.prismweather.dto.request.PasswordResetRequest;
-import com.mehedi.prismweather.dto.request.RegisterRequest;
-import com.mehedi.prismweather.dto.response.*;
+import com.mehedi.prismweather.dto.ApiResponse;
+import com.mehedi.prismweather.dto.auth.*;
 import com.mehedi.prismweather.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

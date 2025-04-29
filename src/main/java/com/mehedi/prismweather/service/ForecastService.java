@@ -1,8 +1,8 @@
 package com.mehedi.prismweather.service;
 
-import com.mehedi.prismweather.dto.forecast.CityInfo;
-import com.mehedi.prismweather.dto.forecast.DailyForecastEntry;
-import com.mehedi.prismweather.dto.forecast.DailyForecastResponse;
+import com.mehedi.prismweather.dto.location.CityInfo;
+import com.mehedi.prismweather.dto.weather.DailyForecastEntry;
+import com.mehedi.prismweather.dto.weather.DailyForecastResponse;
 import com.mehedi.prismweather.exception.CustomException;
 import com.mehedi.prismweather.model.Location;
 import com.mehedi.prismweather.model.User;

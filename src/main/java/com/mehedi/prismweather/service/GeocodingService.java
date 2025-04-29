@@ -1,6 +1,6 @@
 package com.mehedi.prismweather.service;
 
-import com.mehedi.prismweather.dto.response.GeocodingResponse;
+import com.mehedi.prismweather.dto.location.GeocodingResponse;
 import com.mehedi.prismweather.exception.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

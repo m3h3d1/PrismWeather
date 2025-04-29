@@ -1,4 +1,4 @@
-package com.mehedi.prismweather.dto.response;
+package com.mehedi.prismweather.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

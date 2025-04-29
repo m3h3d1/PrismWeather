@@ -1,7 +1,7 @@
 package com.mehedi.prismweather.service;
 
-import com.mehedi.prismweather.dto.request.UpdateUserRequest;
-import com.mehedi.prismweather.dto.response.UserProfileResponse;
+import com.mehedi.prismweather.dto.user.UpdateUserRequest;
+import com.mehedi.prismweather.dto.user.UserProfileResponse;
 import com.mehedi.prismweather.exception.CustomException;
 import com.mehedi.prismweather.model.Profile;
 import com.mehedi.prismweather.model.User;

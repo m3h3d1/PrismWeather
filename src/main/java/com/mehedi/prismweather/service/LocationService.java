@@ -1,8 +1,8 @@
 package com.mehedi.prismweather.service;
 
-import com.mehedi.prismweather.dto.request.LocationRequest;
-import com.mehedi.prismweather.dto.response.GeocodingResponse;
-import com.mehedi.prismweather.dto.response.LocationResponse;
+import com.mehedi.prismweather.dto.auth.LocationRequest;
+import com.mehedi.prismweather.dto.location.GeocodingResponse;
+import com.mehedi.prismweather.dto.location.LocationResponse;
 import com.mehedi.prismweather.exception.CustomException;
 import com.mehedi.prismweather.model.Location;
 import com.mehedi.prismweather.model.User;

@@ -1,8 +1,8 @@
 package com.mehedi.prismweather.controller;
 
-import com.mehedi.prismweather.dto.request.UpdateUserRequest;
-import com.mehedi.prismweather.dto.response.ApiResponse;
-import com.mehedi.prismweather.dto.response.UserProfileResponse;
+import com.mehedi.prismweather.dto.user.UpdateUserRequest;
+import com.mehedi.prismweather.dto.ApiResponse;
+import com.mehedi.prismweather.dto.user.UserProfileResponse;
 import com.mehedi.prismweather.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

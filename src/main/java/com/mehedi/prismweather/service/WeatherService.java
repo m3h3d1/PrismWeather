@@ -1,6 +1,6 @@
 package com.mehedi.prismweather.service;
 
-import com.mehedi.prismweather.dto.response.WeatherResponse;
+import com.mehedi.prismweather.dto.weather.WeatherResponse;
 import com.mehedi.prismweather.exception.CustomException;
 import com.mehedi.prismweather.model.Location;
 import com.mehedi.prismweather.model.User;

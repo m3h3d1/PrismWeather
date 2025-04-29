@@ -1,9 +1,7 @@
 package com.mehedi.prismweather.service;
 
-import com.mehedi.prismweather.dto.request.LoginRequest;
-import com.mehedi.prismweather.dto.request.PasswordResetRequest;
-import com.mehedi.prismweather.dto.request.RegisterRequest;
-import com.mehedi.prismweather.dto.response.*;
+import com.mehedi.prismweather.dto.ApiResponse;
+import com.mehedi.prismweather.dto.auth.*;
 import com.mehedi.prismweather.exception.CustomException;
 import com.mehedi.prismweather.model.Profile;
 import com.mehedi.prismweather.model.User;

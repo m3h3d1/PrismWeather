@@ -1,4 +1,4 @@
-package com.mehedi.prismweather.dto.request;
+package com.mehedi.prismweather.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

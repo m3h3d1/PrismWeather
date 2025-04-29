@@ -1,5 +1,6 @@
-package com.mehedi.prismweather.dto.forecast;
+package com.mehedi.prismweather.dto.weather;
 
+import com.mehedi.prismweather.dto.location.CityInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

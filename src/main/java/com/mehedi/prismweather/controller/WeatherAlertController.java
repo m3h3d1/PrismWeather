@@ -1,7 +1,7 @@
 package com.mehedi.prismweather.controller;
 
 import com.mehedi.prismweather.dto.alerts.WeatherAlertResponse;
-import com.mehedi.prismweather.dto.response.ApiResponse;
+import com.mehedi.prismweather.dto.ApiResponse;
 import com.mehedi.prismweather.service.WeatherAlertService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

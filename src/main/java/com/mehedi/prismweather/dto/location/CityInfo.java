@@ -1,4 +1,4 @@
-package com.mehedi.prismweather.dto.forecast;
+package com.mehedi.prismweather.dto.location;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

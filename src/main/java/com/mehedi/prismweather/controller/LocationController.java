@@ -1,8 +1,8 @@
 package com.mehedi.prismweather.controller;
 
-import com.mehedi.prismweather.dto.request.LocationRequest;
-import com.mehedi.prismweather.dto.response.ApiResponse;
-import com.mehedi.prismweather.dto.response.LocationResponse;
+import com.mehedi.prismweather.dto.auth.LocationRequest;
+import com.mehedi.prismweather.dto.ApiResponse;
+import com.mehedi.prismweather.dto.location.LocationResponse;
 import com.mehedi.prismweather.service.LocationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

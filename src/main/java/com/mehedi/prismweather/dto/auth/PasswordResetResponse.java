@@ -1,12 +1,12 @@
-package com.mehedi.prismweather.dto.response;
+package com.mehedi.prismweather.dto.auth;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class LoginResponse {
-    private String token;
+public class PasswordResetResponse {
+    private String message;
     private UserData user;
 
     @Data
