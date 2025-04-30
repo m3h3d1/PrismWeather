@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +13,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WeatherResponse {
+public class WeatherResponse implements Serializable {
     private Map<String, Object> coord;
     private List<Map<String, Object>> weather;
     private Map<String, Object> main;

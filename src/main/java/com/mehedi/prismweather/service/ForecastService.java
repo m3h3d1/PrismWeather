@@ -10,6 +10,7 @@ import com.mehedi.prismweather.repository.LocationRepository;
 import com.mehedi.prismweather.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,7 @@ public class ForecastService {
         this.rateLimiterService = rateLimiterService;
     }
 
+    @Cacheable(value = "forecast", key = "#locationId")
     public DailyForecastResponse getDailyForecast(Long locationId, String userEmail) {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND.value()));

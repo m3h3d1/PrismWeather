@@ -8,6 +8,7 @@ import com.mehedi.prismweather.repository.LocationRepository;
 import com.mehedi.prismweather.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,7 @@ public class WeatherService {
         this.rateLimiterService = rateLimiterService;
     }
 
+    @Cacheable(value = "weather", key = "#locationId")
     public WeatherResponse getCurrentWeatherForLocation(Long locationId, String userEmail) {
         User user = getUserByEmail(userEmail);
         Location location = getLocationByIdAndUser(locationId, user);

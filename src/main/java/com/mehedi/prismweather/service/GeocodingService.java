@@ -4,6 +4,7 @@ import com.mehedi.prismweather.dto.location.GeocodingResponse;
 import com.mehedi.prismweather.exception.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ public class GeocodingService {
         this.rateLimiterService = rateLimiterService;
     }
 
+    @Cacheable(value = "geocoding", key = "#locationName")
     public GeocodingResponse resolveCoordinates(String locationName) {
         String url = buildGeocodingUrl(locationName);
 

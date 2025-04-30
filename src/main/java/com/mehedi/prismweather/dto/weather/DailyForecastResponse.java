@@ -6,13 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DailyForecastResponse {
+public class DailyForecastResponse implements Serializable {
     private CityInfo cityInfo;
     private List<DailyForecastEntry> forecast;
 }
