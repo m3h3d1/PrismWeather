@@ -1,8 +1,10 @@
 package com.mehedi.prismweather.exception;
 
+import com.mehedi.prismweather.dto.ApiResponse;
 import com.mehedi.prismweather.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -51,6 +53,20 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(RedisConnectionFailureException.class)
+    public ResponseEntity<ApiResponse<Object>> handleRedisConnectionFailure(RedisConnectionFailureException ex, HttpServletRequest request) {
+        log.error("Redis connection failure: ", ex);
+        ApiResponse<Object> response = ApiResponse.builder()
+                .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+                .message("Make sure REDIS server is up and running, then again make the request.")
+                .data(null)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(response);
     }
 
     @ExceptionHandler(Exception.class)

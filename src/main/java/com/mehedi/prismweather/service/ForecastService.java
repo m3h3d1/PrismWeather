@@ -33,14 +33,17 @@ public class ForecastService {
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
     private final String openWeatherApiKey;
+    private final RateLimiterService rateLimiterService;
 
     @Autowired
     public ForecastService(LocationRepository locationRepository, UserRepository userRepository,
-            RestTemplate restTemplate, @Value("${openweather.api.key}") String openWeatherApiKey) {
+            RestTemplate restTemplate, @Value("${openweather.api.key}") String openWeatherApiKey,
+            RateLimiterService rateLimiterService) {
         this.locationRepository = locationRepository;
         this.userRepository = userRepository;
         this.restTemplate = restTemplate;
         this.openWeatherApiKey = openWeatherApiKey;
+        this.rateLimiterService = rateLimiterService;
     }
 
     public DailyForecastResponse getDailyForecast(Long locationId, String userEmail) {
@@ -56,6 +59,8 @@ public class ForecastService {
         String url = String.format(
                 "https://api.openweathermap.org/data/2.5/forecast?q=%s&units=metric&appid=%s",
                 cityName, openWeatherApiKey);
+
+        rateLimiterService.checkRateLimit("weather_api:" + userEmail);
 
         try {
             // Call the OpenWeather API to fetch 3-hourly forecast

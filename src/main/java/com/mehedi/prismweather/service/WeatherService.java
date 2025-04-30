@@ -25,20 +25,25 @@ public class WeatherService {
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
     private final String openWeatherApiKey;
+    private final RateLimiterService rateLimiterService;
 
     @Autowired
     public WeatherService(LocationRepository locationRepository, UserRepository userRepository,
-            RestTemplate restTemplate, @Value("${openweather.api.key}") String openWeatherApiKey) {
+            RestTemplate restTemplate, @Value("${openweather.api.key}") String openWeatherApiKey,
+            RateLimiterService rateLimiterService) {
         this.locationRepository = locationRepository;
         this.userRepository = userRepository;
         this.restTemplate = restTemplate;
         this.openWeatherApiKey = openWeatherApiKey;
+        this.rateLimiterService = rateLimiterService;
     }
 
     public WeatherResponse getCurrentWeatherForLocation(Long locationId, String userEmail) {
         User user = getUserByEmail(userEmail);
         Location location = getLocationByIdAndUser(locationId, user);
         String url = buildWeatherApiUrl(location.getLocation());
+
+        rateLimiterService.checkRateLimit("weather_api:" + userEmail);
 
         try {
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, null,

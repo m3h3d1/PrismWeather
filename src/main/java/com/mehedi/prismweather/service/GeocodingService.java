@@ -20,15 +20,20 @@ public class GeocodingService {
 
     private final RestTemplate restTemplate;
     private final String openWeatherApiKey;
+    private final RateLimiterService rateLimiterService;
 
     @Autowired
-    public GeocodingService(RestTemplate restTemplate, @Value("${openweather.api.key}") String openWeatherApiKey) {
+    public GeocodingService(RestTemplate restTemplate, @Value("${openweather.api.key}") String openWeatherApiKey,
+            RateLimiterService rateLimiterService) {
         this.restTemplate = restTemplate;
         this.openWeatherApiKey = openWeatherApiKey;
+        this.rateLimiterService = rateLimiterService;
     }
 
     public GeocodingResponse resolveCoordinates(String locationName) {
         String url = buildGeocodingUrl(locationName);
+
+        rateLimiterService.checkRateLimit("geocoding_api");
 
         try {
             List<Map<String, Object>> results = fetchGeocodingResults(url);
