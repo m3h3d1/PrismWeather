@@ -114,6 +114,69 @@ PrismWeather is a Spring Boot-based web application that provides weather foreca
 
 ---
 
+## Docker Deployment
+
+The application can be easily deployed using Docker and docker-compose.
+
+### Prerequisites
+
+- Docker
+- Docker Compose
+
+### Steps
+
+1. **Build and Run with Docker Compose**:
+
+   ```bash
+   docker-compose up -d
+   ```
+
+   This will:
+   - Build the Spring Boot application
+   - Start MySQL and Redis containers
+   - Configure all necessary connections between services
+   - Expose the application on port 8080
+
+2. **Access the Application**:
+   - API Documentation: http://localhost:8080/docs
+
+3. **Stop the Containers**:
+
+   ```bash
+   docker-compose down
+   ```
+
+4. **View Logs**:
+
+   ```bash
+   docker-compose logs -f app
+   ```
+
+### Building the Docker Image Separately
+
+If you want to build the Docker image separately:
+
+```bash
+docker build -t prismweather .
+```
+
+### Environment Variables
+
+The Docker setup supports customization through environment variables:
+
+- `SPRING_DATASOURCE_URL`: Database connection URL
+- `SPRING_DATASOURCE_USERNAME`: Database username
+- `SPRING_DATASOURCE_PASSWORD`: Database password
+- `SPRING_JPA_HIBERNATE_DDL_AUTO`: Hibernate schema generation strategy
+- `SPRING_REDIS_HOST`: Redis host
+- `SPRING_REDIS_PORT`: Redis port
+- `SECURITY_JWT_SECRET`: JWT secret key
+- `SECURITY_JWT_EXPIRATION_MS`: JWT token expiration time
+- `OPENWEATHER_API_KEY`: OpenWeather API key
+- `WEATHERAPI_KEY`: WeatherAPI.com API key
+
+---
+
 ## Project Structure
 
 The project follows a standard Spring Boot application structure:

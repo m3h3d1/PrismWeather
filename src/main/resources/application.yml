@@ -3,13 +3,17 @@ spring:
     name: PrismWeather
   datasource:
     url: jdbc:mysql://localhost:3306/prismweather
-    username: root
-    password: root
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:root}
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:create}
     database-platform: org.hibernate.dialect.MySQLDialect
     show-sql: true
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: 6379
 
 security:
   jwt:
@@ -25,11 +29,11 @@ logging:
 
 openweather:
   api:
-    key: "c26dca9c0e9b975e63a5077ae552e24b"
+    key: ${OPENWEATHER_API_KEY:"c26dca9c0e9b975e63a5077ae552e24b"}
 
 #https://www.weatherapi.com/api-explorer.aspx
 weatherapi:
-  key: "04ca50ccd4e14d25831114854251504"
+  key: ${WEATHERAPI_KEY:"04ca50ccd4e14d25831114854251504"}
 
 springdoc:
   api-docs:

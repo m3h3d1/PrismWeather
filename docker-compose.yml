@@ -1,0 +1,62 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/prismweather
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create
+      - SPRING_REDIS_HOST=redis
+      - OPENWEATHER_API_KEY=c26dca9c0e9b975e63a5077ae552e24b
+      - WEATHERAPI_KEY=04ca50ccd4e14d25831114854251504
+    restart: unless-stopped
+    networks:
+      - prism-net
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3316:3306"
+    environment:
+      - MYSQL_DATABASE=prismweather
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+        interval: 10s
+        timeout: 5s
+        retries: 3
+    restart: unless-stopped
+    networks:
+      prism-net:
+
+  redis:
+    image: redis:8.0-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - prism-net
+
+volumes:
+  mysql-data:
+  redis-data:
+
+networks:
+  prism-net:
+    driver: bridge
