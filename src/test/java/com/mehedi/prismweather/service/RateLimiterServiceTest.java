@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
@@ -70,5 +71,17 @@ class RateLimiterServiceTest {
         verify(redisTemplate).opsForValue();
         verify(valueOperations).increment("rate_limiter:test_key", 1);
         verify(redisTemplate).getExpire("rate_limiter:test_key", TimeUnit.SECONDS);
+    }
+
+    @Test
+    void checkRateLimit_RedisConnectionFailure_ShouldNotThrowException() {
+        String key = "test_key";
+        when(redisTemplate.opsForValue()).thenThrow(new RedisConnectionFailureException("Connection refused"));
+
+        // Should not throw an exception when Redis is unavailable
+        assertDoesNotThrow(() -> rateLimiterService.checkRateLimit(key));
+
+        // Verify that we attempted to access Redis
+        verify(redisTemplate).opsForValue();
     }
 }
