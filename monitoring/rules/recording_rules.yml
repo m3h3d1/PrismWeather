@@ -1,0 +1,25 @@
+groups:
+  - name: app_metrics
+    rules:
+      - record: job:http_requests_total:rate5m
+        expr: sum(rate(http_server_requests_seconds_count[5m])) by (job, status, method, uri)
+        
+      - record: job:http_request_duration_seconds:avg5m
+        expr: avg(rate(http_server_requests_seconds_sum[5m]) / rate(http_server_requests_seconds_count[5m])) by (job, status, method, uri)
+        
+      - record: job:http_errors_total:rate5m
+        expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) by (job, uri)
+        
+      - record: job:http_success_total:rate5m
+        expr: sum(rate(http_server_requests_seconds_count{status=~"2.."}[5m])) by (job, uri)
+        
+  - name: jvm_metrics
+    rules:
+      - record: job:jvm_memory_used:ratio
+        expr: sum(jvm_memory_used_bytes) by (job, instance, area) / sum(jvm_memory_max_bytes) by (job, instance, area)
+        
+      - record: job:jvm_gc_pause:max5m
+        expr: max_over_time(jvm_gc_pause_seconds_max[5m])
+        
+      - record: job:jvm_threads:count
+        expr: jvm_threads_live_threads
