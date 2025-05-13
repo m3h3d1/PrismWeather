@@ -53,6 +53,40 @@ services:
     networks:
       - prism-net
 
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    environment:
+      - REDIS_ADDR=redis:6379
+    ports:
+      - "9121:9121"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - prism-net
+
+  mysqld-exporter:
+    image: prom/mysqld-exporter:latest
+    ports:
+      - "9104:9104"
+    command:
+      - "--mysqld.username=root:root"
+      - "--mysqld.address=mysql:3306"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - prism-net
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - prism-net
+
 volumes:
   mysql-data:
   redis-data:
