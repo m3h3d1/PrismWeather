@@ -12,8 +12,7 @@ PrismWeather is a Spring Boot-based web application that provides weather foreca
 4. [Setup and Installation](#setup-and-installation)
 5. [API Endpoints](#api-endpoints)
 6. [Configuration](#configuration)
-7. [Contributing](#contributing)
-8. [License](#license)
+7. [Monitoring](#monitoring)
 
 ---
 
@@ -68,6 +67,13 @@ PrismWeather is a Spring Boot-based web application that provides weather foreca
 
   - OpenWeather API (Current weather, forecasts, and geocoding)
   - WeatherAPI.com (Weather alerts)
+
+- **Monitoring**:
+  - Spring Boot Actuator (Application metrics and health)
+  - Prometheus (Metrics collection and alerting)
+  - Grafana (Metrics visualization and dashboards)
+  - Redis Exporter (Redis metrics)
+  - MySQL Exporter (MySQL metrics)
 
 - **Other Libraries**:
   - Lombok (Boilerplate code reduction)
@@ -134,11 +140,15 @@ The application can be easily deployed using Docker and docker-compose.
    This will:
    - Build the Spring Boot application
    - Start MySQL and Redis containers
+   - Set up Prometheus, Grafana, and exporters for monitoring
    - Configure all necessary connections between services
    - Expose the application on port 8080
 
 2. **Access the Application**:
    - API Documentation: http://localhost:8080/docs
+   - Prometheus: http://localhost:9090
+   - Grafana: http://localhost:3000 (default credentials: admin/admin)
+   - Spring Boot Actuator: http://localhost:8080/actuator
 
 3. **Stop the Containers**:
 
@@ -151,6 +161,15 @@ The application can be easily deployed using Docker and docker-compose.
    ```bash
    docker-compose logs -f app
    ```
+
+5. **Services Included**:
+   - **app**: Spring Boot application
+   - **mysql**: MySQL database
+   - **redis**: Redis cache
+   - **redis-exporter**: Exports Redis metrics to Prometheus
+   - **mysqld-exporter**: Exports MySQL metrics to Prometheus
+   - **prometheus**: Collects and stores metrics
+   - **grafana**: Visualizes metrics with dashboards
 
 ### Building the Docker Image Separately
 
@@ -170,8 +189,6 @@ The Docker setup supports customization through environment variables:
 - `SPRING_JPA_HIBERNATE_DDL_AUTO`: Hibernate schema generation strategy
 - `SPRING_REDIS_HOST`: Redis host
 - `SPRING_REDIS_PORT`: Redis port
-- `SECURITY_JWT_SECRET`: JWT secret key
-- `SECURITY_JWT_EXPIRATION_MS`: JWT token expiration time
 - `OPENWEATHER_API_KEY`: OpenWeather API key
 - `WEATHERAPI_KEY`: WeatherAPI.com API key
 
@@ -179,23 +196,38 @@ The Docker setup supports customization through environment variables:
 
 ## Project Structure
 
-The project follows a standard Spring Boot application structure:
+The project follows a standard Spring Boot application structure with additional directories for monitoring and containerization:
 
 ```
-src/main/java/com/mehedi/prismweather/
-├── config/           # Configuration classes (Security, Redis, etc.)
-├── controller/       # REST API controllers
-├── dto/              # Data Transfer Objects
-│   ├── alerts/       # Weather alert DTOs
-│   ├── auth/         # Authentication DTOs
-│   ├── location/     # Location DTOs
-│   └── weather/      # Weather and forecast DTOs
-├── exception/        # Custom exceptions and error handling
-├── model/            # JPA entity classes
-├── repository/       # Spring Data JPA repositories
-├── security/         # Security-related classes (JWT, etc.)
-├── service/          # Business logic services
-└── util/             # Utility classes
+PrismWeather/
+├── src/
+│   └── main/
+│       ├── java/com/mehedi/prismweather/
+│       │   ├── config/           # Configuration classes (Security, Redis, etc.)
+│       │   ├── controller/       # REST API controllers
+│       │   ├── dto/              # Data Transfer Objects
+│       │   │   ├── alerts/       # Weather alert DTOs
+│       │   │   ├── auth/         # Authentication DTOs
+│       │   │   ├── location/     # Location DTOs
+│       │   │   └── weather/      # Weather and forecast DTOs
+│       │   ├── exception/        # Custom exceptions and error handling
+│       │   ├── filter/           # Request filters (JWT, RequestId, etc.)
+│       │   ├── model/            # JPA entity classes
+│       │   ├── repository/       # Spring Data JPA repositories
+│       │   ├── security/         # Security-related classes (JWT, etc.)
+│       │   ├── service/          # Business logic services
+│       │   └── util/             # Utility classes
+│       └── resources/
+│           └── application.yml   # Application configuration
+├── monitoring/                   # Monitoring configuration
+│   ├── prometheus.yml           # Prometheus configuration
+│   └── rules/                   # Prometheus recording rules
+│       └── recording_rules.yml  # Pre-computed metrics definitions
+├── grafana/                      # Grafana configuration
+│   └── provisioning/            # Grafana provisioning
+│       └── datasources/         # Grafana datasource configuration
+├── Dockerfile                    # Docker image definition
+└── docker-compose.yml           # Docker Compose services definition
 ```
 
 ---
@@ -261,8 +293,6 @@ Rate limiting is applied to the following API endpoints:
 
 When a rate limit is exceeded, the API returns a 429 Too Many Requests status code with information about when the client can retry.
 
----
-
 ## API Endpoints
 
 ### Authentication
@@ -288,5 +318,35 @@ When a rate limit is exceeded, the API returns a 429 Too Many Requests status co
 - GET /api/locations/{id}/weather: Get current weather for a location.
 - GET /api/locations/{id}/forecast: Get daily weather forecast for a location.
 - GET /api/locations/{id}/alerts: Get weather alerts for a location.
+
+---
+
+## Monitoring
+
+PrismWeather includes a comprehensive monitoring stack to track application performance, resource usage, and system health.
+
+### Monitoring Components
+
+- **Spring Boot Actuator**: Exposes application metrics and health information through endpoints.
+- **Prometheus**: Collects and stores metrics from the application and infrastructure.
+- **Grafana**: Provides visualization dashboards for the collected metrics.
+- **Redis Exporter**: Exports Redis metrics to Prometheus.
+- **MySQL Exporter**: Exports MySQL metrics to Prometheus.
+
+### Accessing Monitoring Tools
+
+When running with Docker Compose:
+
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3000 (default credentials: admin/admin)
+- **Spring Boot Actuator**: http://localhost:8080/actuator
+
+### Grafana Dashboards
+
+The Grafana instance comes with dashboards for:
+- Spring Boot application monitoring
+- JVM performance
+- Redis performance
+- MySQL performance
 
 ---
