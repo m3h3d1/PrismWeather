@@ -171,127 +171,34 @@ The application can be easily deployed using Docker and docker-compose.
    - **prometheus**: Collects and stores metrics
    - **grafana**: Visualizes metrics with dashboards
 
-### Building the Docker Image Separately
-
-If you want to build the Docker image separately:
-
-```bash
-docker build -t prismweather .
-```
-
 ### Environment Variables
 
-The Docker setup supports customization through environment variables:
-
-- `SPRING_DATASOURCE_URL`: Database connection URL
-- `SPRING_DATASOURCE_USERNAME`: Database username
-- `SPRING_DATASOURCE_PASSWORD`: Database password
-- `SPRING_JPA_HIBERNATE_DDL_AUTO`: Hibernate schema generation strategy
-- `SPRING_REDIS_HOST`: Redis host
-- `SPRING_REDIS_PORT`: Redis port
-- `OPENWEATHER_API_KEY`: OpenWeather API key
-- `WEATHERAPI_KEY`: WeatherAPI.com API key
+The Docker setup supports customization through environment variables. See the docker-compose.yml file for details.
 
 ---
 
 ## Project Structure
 
-The project follows a standard Spring Boot application structure with additional directories for monitoring and containerization:
+The project follows a standard Spring Boot application structure:
 
-```
-PrismWeather/
-├── src/
-│   └── main/
-│       ├── java/com/mehedi/prismweather/
-│       │   ├── config/           # Configuration classes (Security, Redis, etc.)
-│       │   ├── controller/       # REST API controllers
-│       │   ├── dto/              # Data Transfer Objects
-│       │   │   ├── alerts/       # Weather alert DTOs
-│       │   │   ├── auth/         # Authentication DTOs
-│       │   │   ├── location/     # Location DTOs
-│       │   │   └── weather/      # Weather and forecast DTOs
-│       │   ├── exception/        # Custom exceptions and error handling
-│       │   ├── filter/           # Request filters (JWT, RequestId, etc.)
-│       │   ├── model/            # JPA entity classes
-│       │   ├── repository/       # Spring Data JPA repositories
-│       │   ├── security/         # Security-related classes (JWT, etc.)
-│       │   ├── service/          # Business logic services
-│       │   └── util/             # Utility classes
-│       └── resources/
-│           └── application.yml   # Application configuration
-├── monitoring/                   # Monitoring configuration
-│   ├── prometheus.yml           # Prometheus configuration
-│   └── rules/                   # Prometheus recording rules
-│       └── recording_rules.yml  # Pre-computed metrics definitions
-├── grafana/                      # Grafana configuration
-│   └── provisioning/            # Grafana provisioning
-│       └── datasources/         # Grafana datasource configuration
-├── Dockerfile                    # Docker image definition
-└── docker-compose.yml           # Docker Compose services definition
-```
+- **src/main/java**: Java source code organized by packages
+- **src/main/resources**: Configuration files and static resources
+- **monitoring**: Prometheus and Grafana configuration
+- **Dockerfile**: Docker image definition
+- **docker-compose.yml**: Docker Compose services definition
 
 ---
 
 ## Configuration
 
-The application requires several configuration parameters in the `application.yml` file:
+The application requires configuration parameters in the `application.yml` file for:
 
-### Database Configuration
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/prismweather
-    username: your_username
-    password: your_password
-  jpa:
-    hibernate:
-      ddl-auto: update  # Use 'create' for first run, then 'update'
-```
+- Database connection (MySQL)
+- Security settings (JWT)
+- External API keys (OpenWeather and WeatherAPI.com)
+- Redis connection (for caching)
 
-### Security Configuration
-```yaml
-security:
-  jwt:
-    secret: your_jwt_secret_key
-    expiration-ms: 86400000  # 24 hours
-```
-
-### API Keys
-```yaml
-openweather:
-  api:
-    key: your_openweather_api_key
-
-weatherapi:
-  key: your_weatherapi_key
-```
-
-### Redis Configuration (if using Redis)
-Configure Redis connection details in the RedisConfig class.
-
-### Caching Configuration
-The application uses Redis for caching to improve performance and reduce the number of external API calls. Caching is implemented using Spring's caching annotations.
-
-The following caches are configured:
-- **weather**: Caches current weather data by location ID
-- **forecast**: Caches weather forecast data by location ID
-- **geocoding**: Caches geocoding results by location name
-
-Cache entries are automatically invalidated when the data is updated or after a configured time-to-live period.
-
-### Rate Limiting Configuration
-The application implements rate limiting to prevent abuse of external APIs and ensure fair usage. Rate limiting is configured as follows:
-
-- **Maximum Requests**: 3 requests per time window
-- **Time Window**: 10 seconds
-- **Implementation**: Redis-based token bucket algorithm
-
-Rate limiting is applied to the following API endpoints:
-- Weather API calls (current weather and forecasts)
-- Geocoding API calls
-- Weather Alert API calls
-
-When a rate limit is exceeded, the API returns a 429 Too Many Requests status code with information about when the client can retry.
+Please refer to the sample application.yml file in the project for detailed configuration options.
 
 ## API Endpoints
 
@@ -338,7 +245,7 @@ PrismWeather includes a comprehensive monitoring stack to track application perf
 When running with Docker Compose:
 
 - **Prometheus**: http://localhost:9090
-- **Grafana**: http://localhost:3000 (default credentials: admin/admin)
+- **Grafana**: http://localhost:3000
 - **Spring Boot Actuator**: http://localhost:8080/actuator
 
 ### Grafana Dashboards
